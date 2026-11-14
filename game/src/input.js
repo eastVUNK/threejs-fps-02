@@ -1,14 +1,18 @@
 // Keyboard + mouse input. Pointer lock owns the mouse: movement deltas are
 // consumed once per frame by the game loop (takeLook), so no look input is
-// ever applied twice. Firing is held mouse button; R reloads.
+// ever applied twice. Firing is held mouse button; R reloads. Single-press
+// actions (grenade, buy keys, start) go through takePressed(code), which
+// answers each keydown once.
 export function createInput(canvas, onLockChange) {
   const state = { keys: new Set(), firing: false };
+  const pressed = new Set();
   let lookX = 0;
   let lookY = 0;
 
   function onKeyDown(event) {
     if (event.repeat) return;
     state.keys.add(event.code);
+    pressed.add(event.code);
     if (event.code === 'Space') event.preventDefault();
   }
   function onKeyUp(event) {
@@ -43,6 +47,13 @@ export function createInput(canvas, onLockChange) {
       lookX = 0;
       lookY = 0;
       return look;
+    },
+    takePressed(code) {
+      if (pressed.has(code)) {
+        pressed.delete(code);
+        return true;
+      }
+      return false;
     },
     requestLock() {
       canvas.requestPointerLock();
