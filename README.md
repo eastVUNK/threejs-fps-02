@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/threejs-fps-02/eastVUNK/threejs-fps-02/rank.svg)](https://make.fun/bounty/threejs-fps-02/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=threejs-fps-02)
 [![reward](https://make.fun/badge/threejs-fps-02/eastVUNK/threejs-fps-02/reward.svg)](https://make.fun/bounty/threejs-fps-02?utm_source=github&utm_medium=readme&utm_campaign=threejs-fps-02)
 
-EMBERLINE is a round-based tactical FPS on three.js: Ember versus Slate in the Foundry Yard, first to 5 rounds, with bots that patrol, hold sightlines and shoot back, a rifle with recoil and spread that punishes firing on the move, and round money for a buy menu.
+EMBERLINE is a round-based tactical FPS on three.js: 5v5, Ember versus Slate in the Foundry Yard, first to 5 rounds. Plant the bomb at site A or B (40 s fuse, 5 s defuse), or win by elimination. Bots patrol, hold angles, push as a group and shoot back. Round money buys three rifles, armor and frag grenades between rounds; gunfire has recoil and spread that punish firing on the move, and headshots deal double damage.
 
 ## Run it
 
