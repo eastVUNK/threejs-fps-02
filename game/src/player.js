@@ -21,6 +21,7 @@ export function createPlayer(colliders, spawn) {
     eye: EYE_STAND,
     crouched: false,
     health: 100,
+    armor: 0,
     onGround: true,
   };
   const tmp = new THREE.Vector3();
@@ -102,7 +103,14 @@ export function createPlayer(colliders, spawn) {
       }
     },
     damage(amount) {
-      state.health = Math.max(0, state.health - amount);
+      // Armor absorbs half the damage while it lasts.
+      let remaining = amount;
+      if (state.armor > 0) {
+        const absorbed = Math.min(state.armor, remaining * 0.5);
+        state.armor -= absorbed;
+        remaining -= absorbed;
+      }
+      state.health = Math.max(0, state.health - remaining);
       return state.health;
     },
     reset(spawnPoint) {
@@ -112,6 +120,9 @@ export function createPlayer(colliders, spawn) {
       state.pitch = 0;
       state.health = 100;
       state.onGround = true;
+    },
+    setArmor(points) {
+      state.armor = points;
     },
   };
 }
