@@ -1,6 +1,6 @@
 // The player body: first-person movement with acceleration, crouching and
 // axis-separated AABB collision against the world's Box3 colliders.
-// Stopping to aim pays: spread (in weapon.js) reads groundSpeed().
+// Stopping to aim pays: spread (in weapons.js) reads groundSpeed().
 // One reusable temp vector; nothing is allocated per step.
 import * as THREE from 'three';
 
