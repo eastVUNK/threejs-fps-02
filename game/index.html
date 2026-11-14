@@ -6,7 +6,7 @@
 <title>EMBERLINE — Foundry Yard tactical FPS</title>
 <style>
   /* Look plan: dusk foundry. Canvas ground haze, surface walls, hairline cover,
-     ink text, muted dim text, one Ember-orange accent. */
+     ink text, muted dim text, one Ember-orange accent, Slate blue for the enemy. */
   :root {
     --canvas: #17130f;
     --surface: #2a2622;
@@ -48,6 +48,8 @@
   #hitmarker i:nth-child(3) { top: 12px; left: 0; height: 2px; width: 8px; }
   #hitmarker i:nth-child(4) { top: 12px; right: 0; height: 2px; width: 8px; }
 
+  #flash { position: fixed; inset: 0; background: #fff; opacity: 0; transition: opacity 450ms linear; }
+
   #topbar {
     position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
     display: flex; align-items: center; gap: 14px;
@@ -57,6 +59,8 @@
   #topbar .team-slate { color: var(--slate); font-weight: 700; }
   #timer-value { font-size: 20px; color: var(--ink); }
   #money-value { color: var(--accent); }
+  #bomb-status { color: var(--ink); font-size: 13px; }
+  #grenade-value { color: var(--muted); font-size: 13px; }
 
   #health {
     position: fixed; left: 32px; bottom: 24px; width: 220px;
@@ -65,6 +69,7 @@
   #health-bar { height: 8px; background: var(--hairline); border-radius: 4px; overflow: hidden; margin-top: 6px; }
   #health-fill { height: 100%; width: 100%; background: var(--accent); transition: width 120ms linear; }
   #health-fill.low { background: #ff3b30; }
+  #armor-value { color: var(--slate); }
 
   #ammo {
     position: fixed; right: 32px; bottom: 24px;
@@ -80,6 +85,15 @@
     font-family: var(--font-readout); font-size: 13px; color: var(--muted);
     display: grid; gap: 4px;
   }
+
+  #plant-wrap {
+    position: fixed; left: 50%; top: 58%; transform: translateX(-50%);
+    width: 260px; text-align: center;
+    font-family: var(--font-readout); font-size: 13px; color: var(--ink);
+  }
+  #plant-wrap[hidden] { display: none; }
+  #plant-bar { height: 8px; background: var(--hairline); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  #plant-fill { height: 100%; width: 0%; background: var(--accent); }
 
   #banner {
     position: fixed; top: 22%; left: 50%; transform: translateX(-50%);
@@ -112,36 +126,66 @@
     min-width: 24px; padding: 2px 6px; border: 1px solid var(--hairline);
     border-radius: var(--radius-panel); font-family: var(--font-readout); font-size: 12px; color: var(--ink); text-align: center;
   }
+
+  #buy-menu {
+    position: fixed; inset: 0; display: grid; place-items: center; padding: 24px;
+    background: color-mix(in srgb, var(--canvas) 80%, transparent);
+  }
+  #buy-menu[hidden] { display: none; }
+  #buy-menu .panel { width: min(480px, 100%); }
+  .buy-row { padding: 8px 10px; border: 1px solid var(--hairline); border-radius: var(--radius-panel); margin-bottom: 8px; font-family: var(--font-readout); font-size: 14px; }
+  .buy-row.owned { border-color: var(--accent); color: var(--accent); }
+  .buy-row.poor { opacity: .45; }
+  #buy-start {
+    font: inherit; font-weight: 500; padding: 12px 16px; width: 100%;
+    border: 1px solid var(--accent); border-radius: var(--radius-control);
+    background: var(--accent); color: var(--canvas); cursor: pointer;
+  }
 </style>
 </head>
 <body>
 <div id="game"></div>
 
 <div id="hud" aria-hidden="true">
+  <div id="flash"></div>
   <div id="crosshair"><i></i><i></i><i></i><i></i></div>
   <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
   <div id="topbar">
-    <span class="team-ember">EMBER <b id="score-ember">0</b></span>
+    <span class="team-ember">EMBER <b id="score-ember">0</b> <span id="alive-ember">×5</span></span>
     <span id="timer-value">1:40</span>
-    <span class="team-slate"><b id="score-slate">0</b> SLATE</span>
+    <span class="team-slate"><b id="score-slate">0</b> <span id="alive-slate">×5</span> SLATE</span>
     <span id="money-value">$800</span>
+    <span id="bomb-status">BOMB: CARRYING → A</span>
+    <span id="grenade-value">◉ 0</span>
   </div>
   <div id="feed"></div>
-  <div id="health">HEALTH <span id="health-value">100</span><div id="health-bar"><div id="health-fill"></div></div></div>
+  <div id="health">HEALTH <span id="health-value">100</span> <span id="armor-value"></span><div id="health-bar"><div id="health-fill"></div></div></div>
   <div id="ammo"><span id="ammo-mag">30</span><span id="ammo-reserve">/ 90</span></div>
+  <div id="plant-wrap" hidden><span id="plant-label">PLANTING…</span><div id="plant-bar"><div id="plant-fill"></div></div></div>
   <div id="banner" hidden><h2 id="banner-title"></h2><p id="banner-copy"></p></div>
+</div>
+
+<div id="buy-menu" hidden>
+  <section class="panel" role="dialog" aria-modal="true" aria-labelledby="buy-title">
+    <h1 id="buy-title">Buy phase</h1>
+    <p>Money <b id="buy-money">$800</b> · press a number key to buy, Enter to start the round.</p>
+    <div id="buy-rows"></div>
+    <button id="buy-start" type="button">Start round (Enter)</button>
+  </section>
 </div>
 
 <div id="overlay" class="overlay">
   <section class="panel" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
     <h1 id="overlay-title">EMBERLINE</h1>
-    <p id="overlay-copy">Foundry Yard. Ember versus Slate, first to 5 rounds. Click to play.</p>
+    <p id="overlay-copy">Foundry Yard. Ember versus Slate, first to 5 rounds. Plant the bomb at A or B. Click to play.</p>
     <button id="play" type="button">Click to play</button>
     <ul class="keys">
       <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</li>
       <li><kbd>Mouse</kbd> Look</li>
       <li><kbd>Click</kbd> Fire</li>
       <li><kbd>R</kbd> Reload</li>
+      <li><kbd>E</kbd> Plant / hold to plant</li>
+      <li><kbd>G</kbd> Throw grenade</li>
       <li><kbd>Ctrl</kbd> Crouch</li>
       <li><kbd>Space</kbd> Jump</li>
     </ul>
