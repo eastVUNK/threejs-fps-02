@@ -46,8 +46,8 @@ export function createWorld(scene) {
   // Cover crates: crouch-height on both lanes, tall crates at the corners.
   box(3.4, 1.1, 1.2, -6.0, 0.55, -1.0, 'hairline');
   box(1.2, 1.1, 3.4, 6.0, 0.55, -1.0, 'hairline');
-  box(1.6, 0.7, 1.6, -10.0, 0.35, -7.0, 'hairline');
-  box(1.6, 0.7, 1.6, 10.0, 0.35, -7.0, 'hairline');
+  box(1.6, 0.7, 1.6, -9.0, 0.35, -5.5, 'hairline');
+  box(1.6, 0.7, 1.6, 9.0, 0.35, -5.5, 'hairline');
   box(2.4, 0.9, 1.2, -3.0, 0.45, 6.0, 'hairline');
   box(2.4, 0.9, 1.2, 3.0, 0.45, 6.0, 'hairline');
   box(1.4, 2.2, 1.4, -13.6, 1.1, 9.6, 'surface');
@@ -60,10 +60,11 @@ export function createWorld(scene) {
   const slateSpawn = new THREE.Vector3(0, 0, -9.5);
 
   // Light: warm key from the south-east, cool fill from the north, dusk sky.
-  const sky = new THREE.HemisphereLight(new THREE.Color('#3a3128'), new THREE.Color(PALETTE.canvas), 1.15);
+  // Bright enough that the scene reads at a glance in a screenshot.
+  const sky = new THREE.HemisphereLight(new THREE.Color('#5a4c3c'), new THREE.Color(PALETTE.canvas), 1.7);
   scene.add(sky);
 
-  const key = new THREE.DirectionalLight(new THREE.Color('#ffd9a0'), 2.2);
+  const key = new THREE.DirectionalLight(new THREE.Color('#ffd9a0'), 2.8);
   key.position.set(10, 15, 9);
   key.target.position.set(0, 0, -2);
   key.castShadow = true;
@@ -76,7 +77,7 @@ export function createWorld(scene) {
   key.shadow.bias = -0.0006;
   scene.add(key, key.target);
 
-  const fill = new THREE.DirectionalLight(new THREE.Color(PALETTE.slate), 0.5);
+  const fill = new THREE.DirectionalLight(new THREE.Color(PALETTE.slate), 0.8);
   fill.position.set(-9, 10, -11);
   scene.add(fill);
 
